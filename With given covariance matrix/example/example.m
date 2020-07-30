@@ -1,6 +1,6 @@
 %% setup
 
-
+% test
 % read model
 dx = 10;  n = [81, 121];
 v0 = 2*ones(n);              % initial model

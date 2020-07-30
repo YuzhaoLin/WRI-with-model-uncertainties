@@ -1,154 +1,32 @@
-#####  
+WRI with Uncertainties
+=========
 
-In seismic forward modeling theory, under the assumption of the acoustic medium, wave propagation can be described by the acoustic wave equation:
-$$
-\mathbf{A(\mathbf{m})}
-\mathbf{u}=
-\mathbf{q}
-$$
-in which $\mathbf{u}$ is wavefield, $\mathbf{A}=\omega^2diag(\mathbf{m})+L$ represent a frequency-domain forward modeling operator, $\mathbf{m}$ is model parameter, $\mathbf{q}$ denotes source and $L$ refers to the discretized Laplacian.
+This code provides the basic building blocks to test optimization algorithms on seismic inverse problems.
+The canonical seismic waveform inversion problem is given by
 
-Weglein (2013) pointed out that in the application of full waveform inversion, there are some errors in the data and the earth model. To quantitatively describe such problems, the observed data can be written as:
-$$
-\mathbf{d}=
-\mathbf{P}
-(\mathbf{A}(\mathbf{m}) + \epsilon_p )^{-1}
-\mathbf{q} 
-+\epsilon_m
-$$
-in which $\mathbf{d}$ is the observed data and $\mathbf{P}$ is the sampling operator.  $\epsilon_p$ , $\epsilon_m$ are used to describe the theoretical uncertainties and the measurement uncertainties , which satisfies:
-$$
-\epsilon_m \sim
-\mathscr{N}(0,\Sigma_m)
-$$
+$$\min_{m} \sum_{i} \frac{1}{2}||P^TA(m)^{-1}q_i - d_i||_2^2 + \frac{\alpha}{2}||Lm||_2^2,$$
 
-$$
-\epsilon_p \sim 
-\mathscr{N}(0,\Sigma_p)
-$$
+where $A(m)$ is the discretized Helmholtz operator $\omega^2 m + \nabla^2$ with absorbing boundary conditions, 
+$P$ is the sampling operator, $q_i$ are the source vectors, $d_i$ are the observed data and $L$ is the discretized 
+$\nabla$.
 
-where $\mathscr{N}$ represent the Gaussian distribution and $\Sigma$ is the corresponding covariance matrix. 
+The main function is *misfit.m*, which takes as input the medium parameters $m$ and the data $d_i$ (and definitions of $P$, $q_i$, $\omega$ etc.) and returns the misfit value, its gradient and a function handle to compute the action of the Gauss-Newton hessian.
+
+For an example, see */examples/marm.m*, which uses a simple BB iteration to solve the optimization problem. 
+Replace this with your favourite optimization algorithm and you're ready to roll!
+
+Feel free to contact me with any questions, suggestions, etc.
 
 
 
-The traditional FWI method (Tarantola, 1984; Pratt, 1999) is to minimize a nonlinear least-squares problem, which ignores theoretical and measurement uncertainties:
-$$
-\underset{ \mathbf{m} }  { min }
-\left \| 
-\mathbf{P}\mathbf{A}( \mathbf{m})^{-1} \mathbf{q}- \mathbf{d}
-\right \| ^{2}
-$$
-
-Obviously, equation (5) is unable to provide reliable inversion results when the covariance matrices seriously affects forward modeling and measurement. 
+Tristan van Leeuwen - T.vanLeeuwen@uu.nl
 
 
 
-##### WRI method
-
-In order to accurately describe the inversion problem with uncertainties, a wavefield reconstruction inversion (WRI) objective function can be obtained (van Leeuwen and Herrmann, 2013, 2015) based on the Bayesian interference equation and Gaussian distribution assumption (Tarantola, 2005) (see Appendix A for details):
-$$
-\underset{ \mathbf{u}, \mathbf{m} }  { min }
-\left \| 
-\mathbf{P}\mathbf{u} - \mathbf{d}
-\right \| ^{2} _{\Sigma_{m}} +
-\left \| 
-\mathbf{A}( \mathbf{m}) \mathbf{u} - \mathbf{q}
-\right \|^{2}_{\Sigma_{p}}
-$$
-##### 
-
-In this section, an alternative (but equivalent) formula for extended full-waveform inversion from WRI with uncertainties is derived. This reformulation takes the form of a conventional FWI formula with a medium-dependent weight, which is more easy and cheap to compute.
-
-Firstly, based on the WRI method, considering measurement and physical uncertainties, the extended source formulation can be obtained by introducing a new source-like variable:
-$$
-\mathbf{r} = 
-\mathbf{A}( \mathbf{m}) \mathbf{u} - \mathbf{q}
-$$
-The inversion problem of equation (6) becomes:
-$$
-\underset{ \mathbf{r}, \mathbf{m} }  { min }
-\left \| 
-\mathbf{P}\mathbf{A}(\mathbf{m})^{-1} (\mathbf{r} + \mathbf{q}) - \mathbf{d}
-\right \| ^{2} _{\Sigma_{m}} +
-\left \| 
-\mathbf{r}
-\right \|^{2}_{\Sigma_{p}}
-$$
-
-Minimizing the new variable gives:
-$$
-((\mathbf{P}\mathbf{A}(\mathbf{m})^{-1})^{*}
-\Sigma_{m}^{-1}
-(\mathbf{P}\mathbf{A}(\mathbf{m})^{-1})
-+\Sigma_{p}^{-1}  )
-\mathbf{r}_0 
-= ((\mathbf{P}\mathbf{A}(\mathbf{m})^{-1})^{*}
-\Sigma_{m}^{-1}
-(\mathbf{d}-\mathbf{P}\mathbf{A}(\mathbf{m})^{-1}\mathbf{q}))
-$$
-
-which is the traditional form of the extended FWI. Note that different $\Sigma_p$ choices lead to different extended FWI methods. For example, let $\Sigma_p^{-1}$ be a function of source location distance in the frequency-domain, we will have the source extended FWI (Huang et al., 2018). However, the covariance matrices in equation (11) are independent variables and need to be defined according to our theoretical knowledge.
 
 
+This code was used to produce the examples in the paper: Mitigating local minima in full-waveform inversion by expanding the search space, T. van Leeuwen and F.J. Herrmann, 2013 (submitted to GJI).
 
-Via some algebra(see Appendix B for more details), we can obtain an objection function in the traditional FWI form with a medium-dependent weight:
-$$
-\phi (\mathbf{m}) = 
-\left \| 
-\mathbf{P}\mathbf{A}(\mathbf{m})^{-1} \mathbf{q} - \mathbf{d}
-\right \| ^{2} _{\Sigma(\mathbf{m})+\Sigma_{m}}
-$$
-with:
-$$
-\Sigma(\mathbf{m}) 
-=
-\mathbf{P}(
-\mathbf{A}( \textbf{m})^{*} 
-\Sigma^{-1}_{p} 
-\mathbf{A}( \mathbf{m}))^{-1}
-\mathbf{P}^{*}
-$$
+The code is distributed under the GNU GPL so that others may reproduce these results and conduct additional numerical experiments or modify the code to suit their needs.
 
-In the new objective function, one can see that the theoretical covariance matrix and the measurement covariance matrix constitute a weight function. 
-
-
-
-Remarkably, the gradient of the objective has a simple expression, similar to that of conventional FWI:
-$$
-g(\mathbf{m})=
-\frac { \partial \phi (\mathbf{m}) } { \partial \mathbf{m} } = 
-\frac { \partial } { \partial \mathbf{m} }
-( \mathbf{P}\mathbf{A}(\mathbf{m})^{-1} \mathbf{q} - \mathbf{d} )^*
-( \Sigma(\mathbf{m})+\Sigma_{m} )^{-1}
-( \mathbf{P}\mathbf{A}(\mathbf{m})^{-1} \mathbf{q} - \mathbf{d} )
-$$
-more specifically:
-$$
-g(\mathbf{m})=
--2\mathbf{u}^{*}_{0}  
-\frac {\partial \mathbf{A}} {\partial \mathbf{m}}
-\mathbf{v}_0  +
-2\mathbf{v}^{*}_{0}  
-\frac {\partial \mathbf{A}} {\partial \mathbf{m}}
-\mathbf{w}_0
-$$
-in which:
-$$
-\mathbf{u}_{0}  = \mathbf{A}^{-1} \mathbf{q} 
-$$
-
-$$
-\mathbf{w}_{0}  = \mathbf{A}^{-1} \Sigma_{p}  \mathbf{v}_0
-$$
-
-$$
-\mathbf{v}_{0}  = ( \mathbf{P} \mathbf{A}^{-1})^* 
-(\Sigma(\mathbf{m}) + \Sigma_{m}) ^{-1}
-\mathbf{h}  = 
-( \mathbf{P} \mathbf{A}^{-1})^* 
-\widehat{\mathbf{h}}
-$$
-
-Note that the gradient can be readily computed using the standard tools available in any FWI workflow which only requires one additional forward modeling. The specific algorithm of the inversion will be given after the estimation of covariance matrices and the new residual. 
-
-
+To reproduce the examples from the paper, start Matlab and run example*.m.
