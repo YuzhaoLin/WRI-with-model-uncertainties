@@ -16,16 +16,13 @@ mk = 1./(v0(:)).^2;
 %  or smaller than 0.5
 nf = 12;    f0 = 3;   df = 1;
 
-% receivers, xr = .1 - 10km, with 2*dx spacing, zr = 2*dx
+% receivers
 xr = 20:1*dx:1190;
 zr = 2*dx*ones(1,length(xr));
 
-% sources, xr = .1 - 10km, with 4*dx spacing, zs = 4*dx
+% sources
 xs = 20:10*dx:1190;   
 zs = 2*dx*ones(1,length(xs));
-
-% regularization parameter
-alpha = 0;   k = 1;
 
 % grid
 n  = size(v0);         h  = dx*[1 1];
@@ -48,10 +45,11 @@ Mnoise = mvnrnd(mum, sigmm, length(xs))';
 
 % source covariance
 mus    = zeros(1,n(1)*n(2)); 
-sigmp  = 2e-10*eye(n(1)*n(2),n(1)*n(2));
+sigmp  = 2e-15*eye(n(1)*n(2),n(1)*n(2));
 Pnoise = mvnrnd(mus, sigmp, length(xs))';
 
 %% forward
+k = 1;
 for f = f0:df:nf
     model.f = f;
     fprintf('Forward frequency: %3d \n', f);
@@ -100,7 +98,7 @@ for f = f0:df:nf
     % misfit
     tmp = ['D_' num2str(ki) ];
     dobs = eval(tmp);
-    fh = @(m)misfit(r0,m,dobs,alpha,model);
+    fh = @(m)misfit(r0,m,dobs,model);
     % Simple BB iteration
     [mk,hist] = BBiter(fh,mk,1e-30,5);     
     dlmwrite(['../input/hist_' num2str(f) '.txt'],hist);

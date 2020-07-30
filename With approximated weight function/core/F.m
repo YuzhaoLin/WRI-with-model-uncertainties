@@ -1,12 +1,12 @@
 function D = F(m,model,nw,Pnoise)
 %% Forward operator
 %
-%   D = P^TA^{-1}(m)Q
+%   D = P^TA^{-1}(m)(Q+Pnoise)
 %
 % where P, Q encode the receiver and source locations and L is the first-order FD matrix
 %
 % use:
-%   D = F(m,model);
+%   D = F(m,model,nw,Pnoise);
 %
 % input:
 %   m - squared-slownes [s^2/km^2]
@@ -15,7 +15,8 @@ function D = F(m,model,nw,Pnoise)
 %   model.f - frequency [Hz].
 %   model.{zr,xr} - {z,x} locations of receivers [m] (must coincide with gridpoints)
 %   model.{zs,xs} - {z,x} locations of sources [m] (must coincide with gridpoints)
-%
+%   nw - frequency to generate wavelet
+%   Pnoise - source noise represents forward model uncertainties
 %
 % output:
 %   D - data matrix

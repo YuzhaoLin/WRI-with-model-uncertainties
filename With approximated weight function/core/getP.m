@@ -1,5 +1,5 @@
 function P = getP(h,n,zt,xt)
-% Define sampling operator
+%% Define sampling operator
 %
 % use:
 %   P = getP(h,n,zt,xt)
@@ -12,6 +12,7 @@ function P = getP(h,n,zt,xt)
 %   P     - sparse matrix
 
 
+%%
 z  = [0:n(1)-1]*h(1);
 x  = [0:n(2)-1]*h(2);
 [zz,xx] = ndgrid(z,x);

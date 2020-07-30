@@ -1,12 +1,12 @@
 function [f,g] = misfit(m,D,alpha,model)
-% Evaluate least-squares misfit
+%% Evaluate least-squares misfit
 %
-%   0.5||P^TA^{-1}(m)Q - D||_{F}^2 + 0.5\alpha||Lm||_2^2,
+%   0.5||P^TA^{-1}(m)Q - D||_{F}^2_{Sigma(m)}
 %
 % where P, Q encode the receiver and source locations and L is the first-order FD matrix
 %
 % use:
-%   [f,g,H] = misfit(m,D,model)
+%   [f,g] = misfit(m,D,model)
 %
 % input:
 %   m - squared-slownes [s^2/km^2]
@@ -22,7 +22,6 @@ function [f,g] = misfit(m,D,alpha,model)
 % output:
 %   f - value of misfit
 %   g - gradient (vector of size size(m))
-%   H - GN Hessian (function handle)
 
 
 %% get matrices
@@ -40,14 +39,11 @@ D0  = P' * U0;
 %% sigma(m) : PM
 PM =  D0 *  D0' ;
 
-%% sigma_m : Pm
-% Pm = (D-D0) * (D-D0)'; 
-
 %% compute f
 f  = .5*norm(D0 - D,'fro')^2 + .5*alpha*norm(L*mk)^2;
 
-%% compute residual by gradient method
-K     = PM ; %+ Pm;
+%% compute weighted residual
+K     = PM + 2e-5*eye(length(model.xr),length(model.xr));
 h0    = D - D0;
 h_mdd = K' * h0;
 for iter = 1:5
@@ -72,24 +68,6 @@ for k = 1:size(U0,2)
 end
 g  = g1 - g2;
 
-%% get H
-H = @(m)Hmv(m,U,alpha,model);
-%H = H(m);
 
-end
-
-function y = Hmv(m,U,alpha,model)
-%% get matrices
-L = getL(model.h,model.n);
-A = getA(model.f,m,model.h,model.n);
-P = getP(model.h,model.n,model.zr,model.xr);
-G = @(u)getG(model.f,m,u,model.h,model.n);
-
-%% compute mat-vec
-y = alpha*(L'*L)*m;
-
-for k = 1:size(U,2);
-    y = y + real(G(U(:,k))'*(A'\((P*P')*(A\(G(U(:,k))*m)))));
-end
 
 end

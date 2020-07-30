@@ -1,5 +1,5 @@
 function [xk,hist] = SDiter(fh,x0,tol,maxit,alpha)
-% Steepest descent iteration to solve min_x f(x)
+%% Steepest descent iteration to solve min_x f(x)
 %
 % input:
 %   fh - function handle that returns value and gradient: [f,g] = fh(x)
@@ -18,7 +18,7 @@ xk      = x0;
 
 hist = [k,fk,norm(gk)];
 
-fprintf(1,' k , fk          , ||gk||_2\n');
+fprintf(1,' k , fk    , ||gk||_2\n');
 fprintf(1,'%3d, %1.5e , %1.5e \n',hist);
 
 while (norm(gk) > tol)&&(k < maxit)

@@ -20,18 +20,6 @@ function [x] = mylbfgs(fh,x0,fk,options)
 %   xn - final estimate
 %
 
-% Author: Tristan van Leeuwen
-%         Seismic Laboratory for Imaging and Modeling
-%         Department of Earch & Ocean Sciences
-%         The University of British Columbia
-%         
-% Date: February, 2012
-%
-% You may use this code only under the conditions and terms of the
-% license contained in the file LICENSE provided with this source
-% code. If you do not agree to these terms you may not use this
-% software.
-
 %%
 if nargin<4
     options = [];
@@ -120,7 +108,7 @@ end
 
 % write convergence history
 if write
-    dlmwrite(['../input/histl_' num2str(fk) '.txt'],hist);
+    dlmwrite(['../input/hist_' num2str(fk) '.txt'],hist);
 end
 
 end

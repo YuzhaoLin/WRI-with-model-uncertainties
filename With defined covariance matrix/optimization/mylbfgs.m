@@ -120,7 +120,7 @@ end
 
 % write convergence history
 if write
-    dlmwrite(['../input/histl_' num2str(fk) '.txt'],hist);
+    dlmwrite(['../input/hist_' num2str(fk) '.txt'],hist);
 end
 
 end

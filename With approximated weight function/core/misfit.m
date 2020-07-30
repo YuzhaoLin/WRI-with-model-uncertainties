@@ -1,17 +1,17 @@
-function [f,g] = misfit(r0,m,D,alpha,model)
-% Evaluate least-squares misfit
+function [f,g] = misfit(r0,m,D,model)
+%% Evaluate least-squares misfit
 %
-%   0.5||P^TA^{-1}(m)Q - D||_{F}^2 + 0.5\alpha||Lm||_2^2,
+%   0.5||P^TA^{-1}(m)Q - D||_{F}^2_{Sigma(m)}
 %
 % where P, Q encode the receiver and source locations and L is the first-order FD matrix
 %
 % use:
-%   [f,g,H] = misfit(m,D,model)
+%   [f,g] = misfit(r0,m,D,model)
 %
 % input:
-%   m - squared-slownes [s^2/km^2]
-%   D - single-frequency data matrix
-%   alpha - regularization parameter
+%   r0 - model perturbation 
+%   m  - squared-slownes [s^2/km^2]
+%   D  - single-frequency data matrix
 %   model.h - gridspacing in each direction d = [d1, d2];
 %   model.n - number of gridpoints in each direction n = [n1, n2]
 %   model.f - frequency [Hz].
@@ -22,7 +22,6 @@ function [f,g] = misfit(r0,m,D,alpha,model)
 % output:
 %   f - value of misfit
 %   g - gradient (vector of size size(m))
-%   H - GN Hessian (function handle)
 
 
 %% get matrices
@@ -40,19 +39,14 @@ D0  = P' * U0;
 %% sigma(m) : PM
 dm = diags(r0); 
 Dr = zeros(length(model.xr),length(model.xsf));
-% P0 = zeros(size(U0,1),1);
 for is = 1:size(U0,2)
     r1 = dm * U0(:,is)/100;
     r2 = Ak \ r1;   
-    % P0 = P0 + Q(:,is);% r1;
     Dr(:,is) = D0(:,is) + P' * r2; % 
 end
 PM =  Dr *  Dr' ;
 
-%% sigma_m : Pm
-% Pm = (D-D0) * (D-D0)'; 
-
-%% compute gradient residual 
+%% compute weighted residual 
 K     = PM + 2e-5*eye(length(model.xr),length(model.xr));
 h0    = D - D0;
 h_mdd = K' * h0;
@@ -65,18 +59,15 @@ while ( (iter<15) && (norm(res)>1e-10) )
 end
 
 %% compute f
-f  = .5*norm(h_mdd,'fro')^2 + .5*alpha*norm(L*mk)^2;
+f  = .5*norm(h_mdd.*h0)^2;
 
 %% compute adjoint state
 v0 = Ak' \ (P  * h_mdd ); 
 w0 = Ak \ ((Q*Q')*v0);
-% w01 = Ak \ Q;
-% w02 = Q' * v0;
-% w0  = w01 * w02;
 
 %% compute g
-g1 = alpha*(L'*L)*mk;
-g2 = alpha*(L'*L)*mk;
+g1 = 0*(L'*L)*mk;
+g2 = 0*(L'*L)*mk;
 
 for k = 1:size(U0,2)
     g1 = g1 + 2*real(G(U0(:,k))'*v0(:,k)) ;
@@ -84,24 +75,5 @@ for k = 1:size(U0,2)
 end
 g     = g1  - g2;
 
-%% get H
-H = @(m)Hmv(m,U,alpha,model);
-%H = H(m);
-
 end
 
-function y = Hmv(m,U,alpha,model)
-%% get matrices
-L = getL(model.h,model.n);
-A = getA(model.f,m,model.h,model.n);
-P = getP(model.h,model.n,model.zr,model.xr);
-G = @(u)getG(model.f,m,u,model.h,model.n);
-
-%% compute mat-vec
-y = alpha*(L'*L)*m;
-
-for k = 1:size(U,2);
-    y = y + real(G(U(:,k))'*(A'\((P*P')*(A\(G(U(:,k))*m)))));
-end
-
-end

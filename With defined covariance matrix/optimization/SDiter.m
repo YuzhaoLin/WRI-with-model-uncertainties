@@ -1,5 +1,5 @@
 function [xk,hist] = SDiter(fh,x0,tol,maxit,alpha)
-% Steepest descent iteration to solve min_x f(x)
+%% Steepest descent iteration to solve min_x f(x)
 %
 % input:
 %   fh - function handle that returns value and gradient: [f,g] = fh(x)
