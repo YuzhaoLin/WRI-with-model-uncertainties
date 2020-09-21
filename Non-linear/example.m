@@ -1,43 +1,49 @@
 
 clc,clear
-%% basic paramters
-T  = 1;
-dt = 1e-2;
+%% define model
+n = [101 201];
+h = [25 25];
+[zz,xx] = ndgrid((0:n(1)-1)*h(1),(0:n(2)-1)*h(2));
 
-c = 2000;
+v = @(v0,alpha)(v0 + alpha*zz(:));
 
-fs = 10;
-ts = 0.2;
+%% make data
+model.n = n;
+model.h = h;
+model.f = 5;
+model.Is = {2,1};
+model.Ir = {2,1:201};
 
-r = [800 1000 1200];
+% Noise 
+sigm = 1e-20; 
+mum    = zeros(1,length(model.Ir{2})); 
+sigmm  = sigm*eye(length(model.Ir{2}),length(model.Ir{2}));
+Mnoise = mvnrnd(mum, sigmm, length(model.Is{2}))';
 
-%% forward operator
-params.T  = T;
-params.dt = dt;
-params.r  = r;
+Q = 1;
+D = F(1./v(2000,0.75).^2,Q,model) + Mnoise;
 
-nr = length(params.r);
-nt = (params.T/params.dt + 1);
-F  = @(c)opFunction(length(params.r)*(params.T/params.dt + 1),(params.T/params.dt + 1),@(q,mode)Fmult(q,c,mode,params));
+%% scan over v0
+vs = 1750:25:2250;
 
-%% forward modeling
-q = ricker(fs,ts,params);
-d = F(c)*q;
+fv_fwi  = zeros(1,length(vs));
+fv_new  = zeros(1,length(vs));
 
-%% calculate misfit function
-rho = 1e-10;
-cs = linspace(1500,2500,100);
-phi = zeros(length(cs),2);
-for k = 1:length(cs)
-    phi(k,:) = misfit(cs(k),q,d,rho,params);
+for k = 1:length(vs);
+    vk = v(vs(k),0.75);
+    
+    fv_fwi(k)  = misfit_red(1./vk.^2,Q,D,model);
+    fv_new(k)  = misfit_pen(1./vk.^2,Q,D,model,sigmm);
+  
 end
-
-%% plot
-figure;
-plot(1e-3*cs,phi(:,1)/max(abs(phi(:,1))),'r','linewidth',2); hold on
-plot(1e-3*cs,phi(:,2)/max(abs(phi(:,2))),'b','linewidth',2); 
-xlabel('c [km/s]','fontsize',20);ylabel('\phi','fontsize',20);
-set(gca,'fontsize',20)
+   
+%% plot results
+figure;plot(vs,fv_fwi/max(fv_fwi),'linewidth',2); hold on
+       plot(vs,fv_new/max(fv_new),'r','linewidth',2);
+       xlabel('c [m/s]','fontsize',18);
+       ylabel('Normalized misfit','fontsize',18);
+       legend('FWI','New method','Location','SouthEast');
+       set(gca,'fontsize',18); axis tight
 
 %% save figures
-print(1,'-depsc','wri-un-nonlinear.eps')
+print(1,'-depsc',['misfit']);
