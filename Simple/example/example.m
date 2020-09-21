@@ -92,20 +92,20 @@ end
 vk = reshape(real(1./sqrt(mk)),n);
 
 %% plot
-figure;fig1 = imagesc(x,z,v0+dv);colormap(jet);colorbar; xlabel('Distance/m','fontsize',18);
-       ylabel('Depth/m','fontsize',18); hold on
-       c = colorbar;c.Label.String = 'Velocity(Km/s)';set(gca,'fontsize',18); axis image       
-figure;fig2 = imagesc(x,z,v0);colormap(jet);colorbar; xlabel('Distance/m','fontsize',18);
-       ylabel('Depth/m','fontsize',18);  hold on
-       c = colorbar;c.Label.String = 'Velocity(Km/s)';set(gca,'fontsize',18); axis image     
-figure;fig3 = imagesc(x,z,vk);colormap(jet);colorbar; xlabel('Distance/m','fontsize',18);
-       ylabel('Depth/m','fontsize',18); hold on
-       c = colorbar;c.Label.String = 'Velocity(Km/s)';set(gca,'fontsize',18); axis image
+figure;fig1 = imagesc(x,z,v0+dv);colormap(jet);colorbar; xlabel('Distance [m]','fontsize',18);
+       ylabel('Depth [m]','fontsize',18); hold on
+       c = colorbar;c.Label.String = 'Velocity [Km/s]';set(gca,'fontsize',18); axis image       
+figure;fig2 = imagesc(x,z,v0);colormap(jet);colorbar; xlabel('Distance [m]','fontsize',18);
+       ylabel('Depth [m]','fontsize',18); hold on
+       c = colorbar;c.Label.String = 'Velocity [Km/s]';set(gca,'fontsize',18); axis image     
+figure;fig3 = imagesc(x,z,vk);colormap(jet);colorbar; xlabel('Distance [m]','fontsize',18);
+       ylabel('Depth [m]','fontsize',18); hold on
+       c = colorbar;c.Label.String = 'Velocity [Km/s]';set(gca,'fontsize',18); axis image
 cor = 60;
 figure;fig4 = plot(v0(:,cor)+dv(:,cor),z,'LineWidth',2); hold on
         plot(v0(:,cor),z,'r','LineWidth',2); hold on
         plot(vk(:,cor),z,'g','LineWidth',2); set(gca,'YDir','reverse');
-        xlabel('Velocity(m/s)','fontsize',18);ylabel('Depth(m)','fontsize',18);        
+        xlabel('Velocity [Km/s]','fontsize',18);ylabel('Depth(m)','fontsize',18);        
 figure;for f = f0:df:nf
            tmp = ['../input/hist_' num2str(f) '.txt' ];
            hist = load(tmp);
