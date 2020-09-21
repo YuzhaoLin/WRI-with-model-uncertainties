@@ -81,8 +81,8 @@ figure;plot([1:niter]*dx,tfwi,'LineWidth',2); hold on
        plot([1:niter]*dx,twri,'r','LineWidth',2); hold on
        plot([1:niter]*dx,tnewi,'g','LineWidth',2); hold on
        plot([1:niter]*dx,tnewq,'y','LineWidth',2); 
-       legend('FWI','WRI','NEW I','NEW q','Location','NorthWest');
+       legend('FWI','WRI','New method with Identity matrix','New method with qq^* matrix','Location','NorthWest');
        xlabel('Grid','fontsize',18); 
-       ylabel('Tims [s]','fontsize',18); set(gca,'fontsize',15); 
+       ylabel('Time [s]','fontsize',18); set(gca,'fontsize',15); 
        
 print(1,'-depsc','-r300','time');
