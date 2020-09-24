@@ -35,7 +35,7 @@ z  = [0:n(1)-1]*h(1);  x  = [0:n(2)-1]*h(2);
 % parameters
 model.n  = n;    model.h   = h;    
 model.zr = zr;   model.xr  = xr;    model.nf  = nf;
-model.zs = zs;   model.xs  = xs;   
+model.zs = zs;   model.xs  = xs;    model.dx  = dx;
 
 %% Noise in source and data
 sigm = 2e-6;  sigp = 1e-10;
@@ -68,9 +68,10 @@ for f = f0:df:nf
     % misfit
     tmp = ['D_' num2str(k) ];
     dobs = eval(tmp);
-    fh = @(m)misfit_fwi(m,dobs,alpha,model); % FWI
+    %fh = @(m)misfit_fwi(m,dobs,alpha,model); % FWI
     %fh = @(m)misfit_fwii(m,dobs,alpha,model,sigp,sigmm); % FWI with Identity covariance
     %fh = @(m)misfit_fwiqq(m,dobs,alpha,model,sigmm);     % FWI with qq^* covariance
+    fh = @(m)misfit_fwiai(m,dobs,alpha,model,sigmm);      % FWI with source annihilator
     %fh = @(m)misfit_wri(m,dobs,alpha,model,sigp,sigm);   % WRI
     % Simple BB iteration
     [mk,hist] = BBiter(fh,mk,1e-20,5);   
@@ -121,6 +122,6 @@ figure;for f = f0:df:nf
 %% save plots
 print(1,'-depsc','-r300',['../Fig/vt']);
 print(2,'-depsc','-r300',['../Fig/v0']);
-print(3,'-depsc','-r300',['../Fig/vi_wri']);
+print(3,'-depsc','-r300',['../Fig/vi_fwi-ai']);
 print(4,'-depsc','-r300',['../Fig/vel_log-60']);
 print(5,'-depsc','-r300',['../Fig/misfit']);
