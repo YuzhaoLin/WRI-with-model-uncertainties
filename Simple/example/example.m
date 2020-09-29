@@ -70,8 +70,8 @@ for f = f0:df:nf
     dobs = eval(tmp);
     %fh = @(m)misfit_fwi(m,dobs,alpha,model); % FWI
     %fh = @(m)misfit_fwii(m,dobs,alpha,model,sigp,sigmm); % FWI with Identity covariance
-    %fh = @(m)misfit_fwiqq(m,dobs,alpha,model,sigmm);     % FWI with qq^* covariance
-    fh = @(m)misfit_fwiai(m,dobs,alpha,model,sigmm);      % FWI with source annihilator
+    fh = @(m)misfit_fwiqq(m,dobs,alpha,model,sigmm);     % FWI with qq^* covariance
+    %fh = @(m)misfit_fwiai(m,dobs,alpha,model,sigmm);      % FWI with source annihilator
     %fh = @(m)misfit_wri(m,dobs,alpha,model,sigp,sigm);   % WRI
     % Simple BB iteration
     [mk,hist] = BBiter(fh,mk,1e-20,5);   
