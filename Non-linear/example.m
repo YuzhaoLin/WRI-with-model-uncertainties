@@ -32,8 +32,8 @@ fv_new  = zeros(1,length(vs));
 for k = 1:length(vs);
     vk = v(vs(k),0.75);
     
-    fv_fwi(k)  = misfit_red(1./vk.^2,Q,D,model);
-    fv_new(k)  = misfit_pen(1./vk.^2,Q,D,model,sigmm);
+    fv_fwi(k)  = misfit_fwi(1./vk.^2,Q,D,model);
+    fv_new(k)  = misfit_new(1./vk.^2,Q,D,model,sigmm);
   
 end
    
