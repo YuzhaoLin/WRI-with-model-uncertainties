@@ -39,7 +39,7 @@ U0  = Ak \ Q;
 D0  = P' * U0;
 
 %% cpmpute PP
-PM = P' * inv( Ak' * Ak ) * P * Pp ; %  inv(Pp) *
+PM = Pp * P' * inv( Ak' * Ak ) * P ; %  inv(Pp) *
 
 %% compute gradient residual 
 K     = PM + Pm;

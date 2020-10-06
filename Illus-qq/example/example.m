@@ -35,14 +35,14 @@ model.zs = zs;   model.xsf = xs;
 %% Noise in source and data
 l     = wgn(1,n(1)*n(2),10);
 
-sigp   = 2e-5;
+sigp   = 2e-1;
 mus    = 0; 
 sigmi  = sigp*eye(n(1)*n(2),n(1)*n(2));
-Pnoise0 = sigmi * l';
+Pnoise0 = sqrt(sigmi) * l';
 
 Q       = getQ_for(model.h,model.n,model.zs,model.xsf,model.nf,5);
 sigmq   = Q*Q';
-Pnoiseq = sigmq * l';
+Pnoiseq = sqrt(sigmq) * l';
 
 Qe1 = zeros(n(1),n(2));
 for iz = 1:n(1)
@@ -51,8 +51,8 @@ for iz = 1:n(1)
     end
 end
 Qe1 = Qe1(:);
-sigma1   = 1./(Qe1*Qe1');
-Pnoisea1 = sigma1 * l';
+sigma1   = 1./(diags(Qe1)+1);
+Pnoisea1 = sqrt(sigma1) * l';
 
 Qe2 = zeros(n(1),n(2));
 for iz = 1:n(1)
@@ -61,8 +61,8 @@ for iz = 1:n(1)
     end
 end
 Qe2 = Qe2(:);
-sigma2   = Qe2*Qe2';
-Pnoisea2 = sigma2 * l';
+sigma2   = 1./(diags(Qe2)+1);
+Pnoisea2 = sqrt(sigma2) * l';
 
 %% plot
 figure;imagesc(x,z,reshape(diag(sigmi),n));colormap(jet);colorbar; 

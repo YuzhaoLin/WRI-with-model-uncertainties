@@ -60,7 +60,7 @@ for f = f0:df:nf
 end
 
 %% inversion
-vel_tmp = zeros(n(1)*n(2),k-1);  k = 1; 
+vel_tmp = zeros(n(1)*n(2),k-1);  k = 1; mk = 1./(v0(:)).^2;
 for f = f0:df:nf
     tic;
     model.f = f;   
@@ -72,7 +72,7 @@ for f = f0:df:nf
     %fh = @(m)misfit_wri(m,dobs,alpha,model,sigp,sigm);   % WRI
     %fh = @(m)misfit_fwii(m,dobs,alpha,model,sigp,sigmm); % FWI with Identity covariance
     %fh = @(m)misfit_fwiqq(m,dobs,alpha,model,sigmm);     % FWI with qq^* covariance
-    fh = @(m)misfit_fwiai(m,dobs,alpha,model,sigmm);     % FWI with source distance annihilator
+    %fh = @(m)misfit_fwiai(m,dobs,alpha,model,sigmm);     % FWI with source distance annihilator
    
     % Simple BB iteration
     [mk,hist] = BBiter(fh,mk,1e-20,5);   
