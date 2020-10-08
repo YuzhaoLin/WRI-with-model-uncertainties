@@ -61,11 +61,11 @@ for iz = 1:n(1)
     end
 end
 Qe2 = Qe2(:);
-sigma2   = 1./(diags(Qe2)+1);
+sigma2   = diags(Qe2);
 Pnoisea2 = sqrt(sigma2) * l';
 
 %% plot
-figure;imagesc(x,z,reshape(diag(sigmi),n));colormap(jet);colorbar; 
+figure;imagesc(x,z,reshape(diag(sigmi),n),[0,0.2]);colormap(jet);colorbar; 
        xlabel('Distance [m]','fontsize',18);
        ylabel('Depth [m]','fontsize',18); hold on
        set(gca,'fontsize',18);  axis image   

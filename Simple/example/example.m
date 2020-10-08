@@ -14,7 +14,7 @@ mk = 1./(v0(:)).^2;
 % set frequency, do not set larger
 %  than min(1e3*v(:))/(7.5*dx) 
 %  or smaller than 0.5
-nf = 12;    f0 = 3;   df = 1;
+nf = 12;    f0 = 3;   df = .5;
 
 % receivers
 xr = 20:1*dx:1190;
@@ -38,7 +38,7 @@ model.zr = zr;   model.xr  = xr;    model.nf  = nf;
 model.zs = zs;   model.xs  = xs;    model.dx  = dx;
 
 %% Noise in source and data
-sigm = 5e-6;  sigp = 5e-10;
+sigm = 5e-6;  sigp = 6e-10;
 % data covariance
 mum    = zeros(1,length(xr)); 
 sigmm  = sigm*eye(length(xr),length(xr));
@@ -68,7 +68,7 @@ for f = f0:df:nf
     % misfit
     tmp = ['D_' num2str(k) ];
     dobs = eval(tmp);
-    %fh = @(m)misfit_fwi(m,dobs,alpha,model);             % FWI
+    fh = @(m)misfit_fwi(m,dobs,alpha,model);             % FWI
     %fh = @(m)misfit_wri(m,dobs,alpha,model,sigp,sigm);   % WRI
     %fh = @(m)misfit_fwii(m,dobs,alpha,model,sigp,sigmm); % FWI with Identity covariance
     %fh = @(m)misfit_fwiqq(m,dobs,alpha,model,sigmm);     % FWI with qq^* covariance
