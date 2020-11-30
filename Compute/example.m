@@ -2,7 +2,7 @@
 
 
 clc,clear
-%%
+%% basic parameters
 r = 20;
 s = 1;
 a = 1e-2; 
