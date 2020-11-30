@@ -11,10 +11,8 @@ dv(66:69,:)     = 0.3;
 m  = 1./(v0(:) + dv(:)).^2;
 mk = 1./(v0(:)).^2;
 
-% set frequency, do not set larger
-%  than min(1e3*v(:))/(7.5*dx) 
-%  or smaller than 0.5
-nf = 12;    f0 = 3;   df = .5;
+% set frequency
+nf = 12;    f0 = 3;   df = 1;
 
 % receivers
 xr = 20:1*dx:1190;
@@ -38,7 +36,7 @@ model.zr = zr;   model.xr  = xr;    model.nf  = nf;
 model.zs = zs;   model.xs  = xs;    model.dx  = dx;
 
 %% Noise in source and data
-sigm = 5e-6;  sigp = 6e-10;
+sigm = 5e-8;  sigp = 5e-8;
 % data covariance
 mum    = zeros(1,length(xr)); 
 sigmm  = sigm*eye(length(xr),length(xr));
@@ -60,11 +58,11 @@ for f = f0:df:nf
 end
 
 %% inversion
-vel_tmp = zeros(n(1)*n(2),k-1);  k = 1; mk = 1./(v0(:)).^2;
+k = 1; fwimk = 1./(v0(:)).^2;
 for f = f0:df:nf
     tic;
     model.f = f;   
-    fprintf('Inversion frequency: %3d \n', f);
+    fprintf('FWI Inversion frequency: %3d \n', f);
     % misfit
     tmp = ['D_' num2str(k) ];
     dobs = eval(tmp);
@@ -75,54 +73,88 @@ for f = f0:df:nf
     %fh = @(m)misfit_fwiai(m,dobs,alpha,model,sigmm);     % FWI with source distance annihilator
    
     % Simple BB iteration
-    [mk,hist] = BBiter(fh,mk,1e-20,5);   
-	dlmwrite(['../input/hist_' num2str(f) '.txt'],hist);	
-    
-    % modify update direction
-%     for icor = 1:n(1)*n(2)
-%         if( (mk(icor))>max(m) )
-%            mk(icor) = max(m);
-%         end
-%         if( (mk(icor))<min(m) )
-%            mk(icor) = min(m);
-%         end
-%     end 
-    vel_tmp(:,k) = mk;
+    [fwimk,hist] = BBiter(fh,fwimk,1e-20,5);   
+	dlmwrite(['../input/hist_fwi_' num2str(f) '.txt'],hist);	
+ 
     k = k+1;   toc;    
 end
+vfwi = reshape(real(1./sqrt(fwimk)),n);
 
-vk = reshape(real(1./sqrt(mk)),n);
+k = 1; wrimk = 1./(v0(:)).^2;
+for f = f0:df:nf
+    tic;
+    model.f = f;   
+    fprintf('FWI Inversion frequency: %3d \n', f);
+    % misfit
+    tmp = ['D_' num2str(k) ];
+    dobs = eval(tmp);
+    fh = @(m)misfit_wri(m,dobs,alpha,model,sigp,sigm);   % WRI
+    
+    % Simple BB iteration
+    [wrimk,hist] = BBiter(fh,wrimk,1e-20,5);   
+	dlmwrite(['../input/hist_wri_' num2str(f) '.txt'],hist);	
+ 
+    k = k+1;   toc;    
+end
+vwri = reshape(real(1./sqrt(wrimk)),n);
+
+% k = 1; fwiai = 1./(v0(:)).^2;
+% for f = f0:df:nf
+%     tic;
+%     model.f = f;   
+%     fprintf('FWI Inversion frequency: %3d \n', f);
+%     % misfit
+%     tmp = ['D_' num2str(k) ];
+%     dobs = eval(tmp);
+%     fh = @(m)misfit_fwiai(m,dobs,alpha,model,sigm);     % FWI with source distance annihilator
+%    
+%     % Simple BB iteration
+%     [fwiai,hist] = BBiter(fh,fwiai,1e-20,5);   
+% 	dlmwrite(['../input/hist_fwi_' num2str(f) '.txt'],hist);	
+%  
+%     k = k+1;   toc;    
+% end
+% vfwiai = reshape(real(1./sqrt(fwiai)),n);
+
+% k = 1; fwiqmk = 1./(v0(:)).^2;
+% for f = f0:df:nf
+%     tic;
+%     model.f = f;   
+%     fprintf('FWI Inversion frequency: %3d \n', f);
+%     % misfit
+%     tmp = ['D_' num2str(k) ];
+%     dobs = eval(tmp);   
+%     fh = @(m)misfit_fwiqq(m,dobs,alpha,model,sigm);     % FWI with qq^* covariance
+%     
+%     % Simple BB iteration
+%     [fwiqmk,hist] = BBiter(fh,fwiqmk,1e-20,5);   
+% 	dlmwrite(['../input/hist_fwiq_' num2str(f) '.txt'],hist);	
+%  
+%     k = k+1;   toc;    
+% end
+% vfwiq = reshape(real(1./sqrt(fwiqmk)),n);
 
 %% plot
 figure;fig1 = imagesc(x,z,v0+dv);colormap(jet);colorbar; xlabel('Distance [m]','fontsize',18);
        ylabel('Depth [m]','fontsize',18); hold on
        c = colorbar;c.Label.String = 'Velocity [Km/s]';set(gca,'fontsize',18); axis image       
-figure;fig2 = imagesc(x,z,v0);colormap(jet);colorbar; xlabel('Distance [m]','fontsize',18);
-       ylabel('Depth [m]','fontsize',18); hold on
-       c = colorbar;c.Label.String = 'Velocity [Km/s]';set(gca,'fontsize',18); axis image     
-figure;fig3 = imagesc(x,z,vk,[2,2.3]);colormap(jet);colorbar; xlabel('Distance [m]','fontsize',18);
+% figure;fig2 = imagesc(x,z,v0);colormap(jet);colorbar; xlabel('Distance [m]','fontsize',18);
+%        ylabel('Depth [m]','fontsize',18); hold on
+%        c = colorbar;c.Label.String = 'Velocity [Km/s]';set(gca,'fontsize',18); axis image     
+figure;fig3 = imagesc(x,z,vfwi,[2,2.3]);colormap(jet);colorbar; xlabel('Distance [m]','fontsize',18);
        ylabel('Depth [m]','fontsize',18); hold on
        c = colorbar;c.Label.String = 'Velocity [Km/s]';set(gca,'fontsize',18); axis image
-cor = 60;
-figure;fig4 = plot(v0(:,cor)+dv(:,cor),z,'LineWidth',2); hold on
-        plot(v0(:,cor),z,'r','LineWidth',2); hold on
-        plot(vk(:,cor),z,'g','LineWidth',2); set(gca,'YDir','reverse');
-        xlabel('Velocity [Km/s]','fontsize',18);ylabel('Depth(m)','fontsize',18);        
-figure;for f = f0:df:nf
-           tmp = ['../input/hist_' num2str(f) '.txt' ];
-           hist = load(tmp);
-           if(f == f0)
-               ymax = max(hist(:,3));
-           end
-           fig5 = subplot(1,nf-f0+1,f-f0+1);
-           plot(hist(:,3),'LineWidth',2);axis([0,length(hist(:,3)),0,ymax]);
-           tmp = ['Iteration at ' num2str(f) ' Hz'];
-           xlabel(tmp,'fontsize',15); ylabel('Misfit function','fontsize',15); 
-        end  
-        
+figure;fig4 = imagesc(x,z,vwri,[2,2.3]);colormap(jet);colorbar; xlabel('Distance [m]','fontsize',18);
+       ylabel('Depth [m]','fontsize',18); hold on
+       c = colorbar;c.Label.String = 'Velocity [Km/s]';set(gca,'fontsize',18); axis image
+% figure;fig5 = imagesc(x,z,vfwiai,[2,2.3]);colormap(jet);colorbar; xlabel('Distance [m]','fontsize',18);
+%        ylabel('Depth [m]','fontsize',18); hold on
+%        c = colorbar;c.Label.String = 'Velocity [Km/s]';set(gca,'fontsize',18); axis image
+% figure;fig6 = imagesc(x,z,vfwiq,[2,2.3]);colormap(jet);colorbar; xlabel('Distance [m]','fontsize',18);
+%        ylabel('Depth [m]','fontsize',18); hold on
+%        c = colorbar;c.Label.String = 'Velocity [Km/s]';set(gca,'fontsize',18); axis image
+       
 %% save plots
-print(1,'-depsc','-r300',['../Fig/sim-vt']);
-print(2,'-depsc','-r300',['../Fig/v0']);
-print(3,'-depsc','-r300',['../Fig/sim-vi_fwi-ai']);
-print(4,'-depsc','-r300',['../Fig/vel_log-60']);
-print(5,'-depsc','-r300',['../Fig/misfit']);
+% print(1,'-depsc','-r300',['../Fig/sim-vt']);
+% print(2,'-depsc','-r300',['../Fig/v0']);
+% print(3,'-depsc','-r300',['../Fig/sim-vi_fwi-ai']);

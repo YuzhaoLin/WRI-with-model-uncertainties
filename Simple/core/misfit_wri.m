@@ -29,7 +29,7 @@ mk = m(:);
 L  = getL(model.h,model.n);
 Ak = getA(model.f,mk,model.h,model.n);
 P  = getP(model.h,model.n,model.zr,model.xr);
-Q  = getQ_for(model.h,model.n,model.zs,model.xs,model.nf,model.f);
+Q  = getQ(model.h,model.n,model.zs,model.xs,model.f);
 G  = @(u)getG(model.f,u,model.n);
 
 %% wavefield reconstruction

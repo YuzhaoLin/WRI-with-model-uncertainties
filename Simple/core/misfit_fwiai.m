@@ -29,7 +29,7 @@ mk = m(:);
 L  = getL(model.h,model.n);
 Ak = getA(model.f,mk,model.h,model.n);
 P  = getP(model.h,model.n,model.zr,model.xr);
-Q  = getQ_for(model.h,model.n,model.zs,model.xs,model.nf,model.f);
+Q  = getQ(model.h,model.n,model.zs,model.xs,model.f);
 G  = @(u)getG(model.f,u,model.n);
 
 %% source distance annihilator
@@ -62,7 +62,7 @@ f  = .5*norm( h_sm .* (D-D0) )^2;
 
 %% compute adjoint state
 v0  = Ak' \ (P  * h_sm ); 
-w0  = Ak \ Q * Q' * v0;
+w0  = Ak \ Qa * Qa' * v0;
 
 %% compute g
 g1 = alpha*(L'*L)*mk;

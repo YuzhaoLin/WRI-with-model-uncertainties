@@ -28,7 +28,7 @@ A = omega^2*diags(a.*m) + (2i*omega/h(1))*diags((1-a).*sqrt(m)) + L;
 % A = omega^2*diags(a.*m) + (2i*omega/h(1))*diags((1-a).*sqrt(m)) + L; 
 
 if (f > min(1e3*1./sqrt(m))/(7.5*h(1)))
-    warning('I told you not to set the frequency too high or too low Sasha! :)');
+    warning('Frequency problem');
 end
 
 

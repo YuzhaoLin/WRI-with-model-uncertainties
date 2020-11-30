@@ -30,7 +30,7 @@ m = m(:);
 L = getL(model.h,model.n);
 A = getA(model.f,m,model.h,model.n);
 P = getP(model.h,model.n,model.zr,model.xr);
-Q = getQ_for(model.h,model.n,model.zs,model.xs,model.nf,model.f);
+Q = getQ(model.h,model.n,model.zs,model.xs,model.f);
 G = @(u)getG(model.f,u,model.n);
 
 %% forward solve

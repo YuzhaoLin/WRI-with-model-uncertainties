@@ -23,7 +23,7 @@ function D = F(m,model,Pnoise)
 %% generate matrices
 A  = getA(model.f,m,model.h,model.n);
 P  = getP(model.h,model.n,model.zr,model.xr);
-Q  = getQ_for(model.h,model.n,model.zs,model.xs,model.nf,model.f);
+Q  = getQ(model.h,model.n,model.zs,model.xs,model.f);
 
 %% solve
 D = P'*(A\(Q+Pnoise));
